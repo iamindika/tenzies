@@ -1,0 +1,13 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 400 13px / 16px "Inter", sans-serif;
+}
+
+/*
+  font-family: 'Inter', sans-serif;
+  font-family: 'Karla', sans-serif;
+*/
