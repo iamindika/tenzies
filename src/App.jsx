@@ -1,57 +1,57 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Dice from "./components/Dice";
-import { 
-  createMultipleDice, 
+import Confetti from "react-confetti";
+import {
+  newDie,
+  allNewDice, 
   isAllDiceEqual, 
-  isAllDiceFrozen 
-} from "./helpers/helpers";
+  isAllDiceHeld
+} from "./helpers";
 
 function App() {
-  const [ dice, setDice ] = useState(() => createMultipleDice(10));
+  const [ dice, setDice ] = useState(() => allNewDice());
+  const [ tenzies, setTenzies] = useState(false);
 
-  const toggleFreeze = (id) => {
-    setDice(prevDice => prevDice.map(die => {
+  useEffect(() => {
+    if(isAllDiceHeld(dice) && isAllDiceEqual(dice)) {
+      setTenzies(true);
+    }
+  }, [dice])
+
+  const toggleHold= (id) => {
+    setDice(oldDice => oldDice.map(die => {
       return die.id !== id 
         ? die
-        : { ...die, isFrozen: !die.isFrozen }
+        : { ...die, isHeld: !die.isHeld }
     }));
   };
 
   const rollDice = () => {
-    const numDiceToRoll = dice.filter(die => !die.isFrozen).length;
-    const newDiceRolls = createMultipleDice(numDiceToRoll);
-    const newDice = dice.map(die => {
-      return die.isFrozen 
-        ? die
-        : { ...newDiceRolls.shift(), id: die.id}
-      });
-
-    setDice(newDice);
-  }
-
-  const reset = () => {
-    const newDice = createMultipleDice(10);
-
-    setDice(newDice);
+    if(tenzies) {
+      setTenzies(false);
+      setDice(allNewDice());
+    } else {
+      setDice(oldDice => oldDice.map(die => {
+        return die.isHeld
+          ? die
+          : { id: die.id, ...newDie() }
+      }))
+    }
   }
 
   return (
     <main className="main">
+      {tenzies && <Confetti />}
       <h1 className="main-title">Tenzies</h1>
       <p className="main-text">Roll until all dice are the same. Click each die to freeze it at its current value between rolls.</p>
 
-      <Dice dice={dice} handleClick={toggleFreeze} />
+      <Dice dice={dice} onToggleHold={toggleHold} />
 
-      {isAllDiceEqual(dice) && isAllDiceFrozen(dice)
-        ? <button
-            className="btn"
-            onClick={reset}
-          >Reset</button>
-        : <button
-            className="btn"
-            onClick={rollDice}
-            disabled={isAllDiceFrozen(dice)}
-          >Roll</button>}
+      <button
+        className="btn"
+        onClick={rollDice}
+        disabled={isAllDiceHeld(dice) && !isAllDiceEqual(dice)}
+      >{tenzies ? "Reset" : "Roll"}</button>
     </main>
   )
 }
