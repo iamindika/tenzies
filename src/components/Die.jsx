@@ -1,7 +1,7 @@
-const Die = ({ id, value, isFrozen, handleClick }) => (
+const Die = ({ value, isHeld, onToggleHold }) => (
   <li 
-    className={`die ${isFrozen && 'freeze'}`}
-    onClick={() => handleClick(id)}
+    className={`die ${isHeld && 'die--hold'}`}
+    onClick={onToggleHold}
   >
     {value}
   </li>
